@@ -13,12 +13,8 @@ socket.on("error", () => {
 socket.on("loadvideo", (url) => {
     // console.log("(CLIENT) VIDEO: ", url)
 
-
-    //all videos ==>
-    // if(!url[0]) {
-        // alert("No new videos available")
-    // }
-    // else {
+    console.log("Video URL received ", url)
+    
         for(let i = 0; i < Math.min(url.length, 5); i++) {
             console.log(url[i]);
             const newVid = document.createElement("div");

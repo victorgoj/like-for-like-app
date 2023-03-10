@@ -26,14 +26,10 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
 
-
 const mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost:27017/likefourlike');
 
 app.use("/public", express.static("public")) //für lokale JS Dateien
-
-
-
 
 const requireLogin = (req, res, next) => {
     if (!req.session.user_id) {
@@ -73,7 +69,6 @@ app.post("/login", async (req, res) => {
 
 app.get("/", requireLogin, async (req, res) => {
 
-
     if (!logged) {
         const authorizeUrl = oauth2Client.generateAuthUrl({
             access_type: 'offline',
@@ -83,7 +78,6 @@ app.get("/", requireLogin, async (req, res) => {
     }
 
     else {
-
         var oauth2 = google.oauth2({
             version: "v2"
             // auth: oauth2Client
@@ -96,12 +90,10 @@ app.get("/", requireLogin, async (req, res) => {
         const userInfos = await oauth2.userinfo.get();
         name = userInfos.data.name;
         // console.log("here1", tryThis.data.name)
-
         const user = await User.findOne({ username: req.session.username });
         const username = user.username;
         const points = user.points;
         let videosArray = [];
-
         for await (const vid of Video.find()) {
             videosArray.push(vid);
         }
@@ -144,17 +136,10 @@ io.on("connection", (socket) => {
     })
 
     socket.on("likeVideoEvent", async (data) => {
-        // console.log("TEST WORKING ", url)
-
-
+        
         //TODO:
         //2. Give points
         //3. Points abziehen
-
-        // console.log("HERE URL ", data.url)
-        // console.log("HERE USERNAME ", data.username)
-
-
         var youtube = google.youtube({
             version: "v3"
         })
@@ -181,36 +166,41 @@ io.on("connection", (socket) => {
 
     })
 
-
     app.post("/loadvideo", async (req, res) => {
 
         const u1 = req.body.username;
         const videos = await Video.find({ "user": { $ne: u1 } });
         if (videos) {
-
             var youtube = google.youtube({
                 version: "v3"
-
             })
 
-            for (let vid of videos) {
+            const tmpVideos = [];
+
+            // for (let vid of videos) {
+                for(let i = 0; i < videos.length; i++) {
                 await youtube.videos.getRating({
                     "id": [
-                        `${vid.url}`
+                        `${videos[i].url}`
                     ]
                 }).then(res => {
                     if (res.data.items[0].rating == "like") {
-                        console.log("LIKED ", vid.url, " -> ", videos.indexOf(vid))
-                        if (videos.indexOf(vid) > -1) {
-                            videos.splice(videos.indexOf(vid), 1);
-                        }
+                        console.log("LIKED ", videos[i].url)
+                        // if (videos.indexOf(vid) > -1) {
+                            // videos.splice(videos.indexOf(vid), 1);
+                        // }
+                    }
+                    else {
+                        console.log("Adding ", videos[i].url, " : ", res.data.items[0].rating)
+                        tmpVideos.push(videos[i]);
                     }
                 })
 
             }
-            console.log("emitting")
-            console.log(videos)
-            socket.emit("loadvideo", videos)
+
+            console.log("post_emitting")
+            console.log(tmpVideos)
+            socket.emit("loadvideo", tmpVideos)
             res.redirect("/")
         }
         else {
@@ -218,11 +208,6 @@ io.on("connection", (socket) => {
             socket.emit("error")
         }
     })
-
-
-
-
-
 
     app.post("/post", async (req, res) => {
 
@@ -253,31 +238,16 @@ io.on("connection", (socket) => {
                     points: req.body.points
                 })
                 await video.save();
-
                 console.log("Video Posted!")
                 socket.emit("success");
                 res.redirect("/");
             }
-
             else {
                 socket.emit("error")
                 console.log("Video schon vorhanden!")
             }
-
         }
-
-
-
-
     })
-
-
-
-
-
-
-
-
 
     app.get("/freepoints", requireLogin, async (req, res) => {
         const user = await User.findOneAndUpdate({ username: `${req.session.username}` }, { "$inc": { "points": 100 } })
