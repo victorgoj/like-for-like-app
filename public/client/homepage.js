@@ -51,11 +51,8 @@ socket.on("loadvideo", (url) => {
 })
 
 const likeButtonOnClickEvent = (url, uploader, pointsP) => {
-    // console.log("clickeeeeed ", url);
     
-
     socket.emit("likeVideoEvent", ({"url": url, "username": document.getElementById("usernameSpan").innerHTML, "uploader": uploader, "points": pointsP}));
-
 }
 
 socket.on("success", () => {
@@ -93,13 +90,8 @@ postButton.addEventListener("click", (e) => {
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         // console.log(JSON.stringify(temp));
         xhr.send(`videoUrl=${videoUrlTextBox.value}&username=${document.getElementById("usernameSpan").innerHTML}&points=${document.getElementById("pointsBox").value}`);
-
     }
-
-
 })
-
-
 
 const enoughPoints = (points) => {
     const userPoints = parseInt(document.getElementById("anzPoints").innerHTML);

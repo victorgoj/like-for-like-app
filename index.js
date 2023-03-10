@@ -132,20 +132,6 @@ let usernames = [];
 
 io.on("connection", (socket) => {
     console.log("[Server]: connection established with socket id: ", socket.id)
-    // socket.emit("hello", "world");
-    let newSocketId = "";
-    // socket.on("send_username", (username1) => {
-    //     // console.log("HEEEEEEEEEEE");
-    //     console.log(usernames.filter(e => e.username === username1));
-    //     if(usernames.filter(e => e.username === username1).length > 0) {
-    //     console.log("Adding for first time ", username1, " and ", socket.id);
-    //         usernames.push({username: username1, socket: socket.id})
-    //     console.log("SOCKET.ID: ", socket.id, ", USERNAME ", username1);
-    //     //update old socket id
-    //     // newSocketId = socket.id;
-    //     }
-    //     })
-    // // })
 
     socket.on("update_socket", (username1) => {
         console.log("[SERVER] received username from ", socket.id, " and username: ", username1);
