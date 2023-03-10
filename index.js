@@ -226,7 +226,7 @@ io.on("connection", (socket) => {
         // else {
         //     console.log("ERROR PATH")
         //     socket.emit("error")
-        // }
+        }
     })
 
     app.post("/post", async (req, res) => {
