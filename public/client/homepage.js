@@ -1,7 +1,20 @@
 const postButton = document.getElementById("submitButton");
 var socket = io()
 const loadButton = document.getElementById("loadButton")
+const uName = document.getElementById("usernameSpan").innerHTML;
+socket.on("connect", () => {
+    console.log("[CLIENT]: ID: ", socket.id);
+    socket.emit("update_socket", uName);
+    // console.log(socket.id); // x8WIv7-mJelg7on_ALbx
+  });
 
+  socket.on("disconnect", () => {
+    console.log("[CLIENT]: disconnected");
+  })
+
+  socket.on("socket_test", (username) => {
+    console.log("Socket test worked for ", username);
+  })
 
 socket.on("error", () => {
     const fehler = document.createElement("h1");
@@ -9,6 +22,8 @@ socket.on("error", () => {
     fehler.style.color = "red";
     document.body.appendChild(fehler);
 })
+
+
 
 socket.on("loadvideo", (url) => {
     // console.log("(CLIENT) VIDEO: ", url)

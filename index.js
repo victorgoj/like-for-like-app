@@ -128,8 +128,37 @@ app.get("/google/callback", async (req, res) => {
     res.redirect("/")
 })
 
+let usernames = [];
+
 io.on("connection", (socket) => {
-    console.log("connection established with socket (SERVER)")
+    console.log("[Server]: connection established with socket id: ", socket.id)
+    // socket.emit("hello", "world");
+    let newSocketId = "";
+    // socket.on("send_username", (username1) => {
+    //     // console.log("HEEEEEEEEEEE");
+    //     console.log(usernames.filter(e => e.username === username1));
+    //     if(usernames.filter(e => e.username === username1).length > 0) {
+    //     console.log("Adding for first time ", username1, " and ", socket.id);
+    //         usernames.push({username: username1, socket: socket.id})
+    //     console.log("SOCKET.ID: ", socket.id, ", USERNAME ", username1);
+    //     //update old socket id
+    //     // newSocketId = socket.id;
+    //     }
+    //     })
+    // // })
+
+    socket.on("update_socket", (username1) => {
+        console.log("[SERVER] received username from ", socket.id, " and username: ", username1);
+        console.log(usernames.filter(e => e.username === username1));
+        if(!usernames.filter(e => e.username === username1).length > 0) {
+        console.log("Adding for first time ", username1, " and ", socket.id);
+            usernames.push({username: username1, socket: socket.id})
+        }  
+        else {
+            console.log("Updating")
+            usernames[usernames.findIndex(e => e.username === username1)].socket = socket.id;
+        }
+    })
 
     socket.on("disconnect", () => {
         console.log("user disconnected")
@@ -168,7 +197,10 @@ io.on("connection", (socket) => {
 
     app.post("/loadvideo", async (req, res) => {
 
+        console.log("p1: ", socket.id)
+
         const u1 = req.body.username;
+        console.log("u1 ", u1);
         const videos = await Video.find({ "user": { $ne: u1 } });
         if (videos) {
             var youtube = google.youtube({
@@ -177,7 +209,6 @@ io.on("connection", (socket) => {
 
             const tmpVideos = [];
 
-            // for (let vid of videos) {
                 for(let i = 0; i < videos.length; i++) {
                 await youtube.videos.getRating({
                     "id": [
@@ -185,28 +216,31 @@ io.on("connection", (socket) => {
                     ]
                 }).then(res => {
                     if (res.data.items[0].rating == "like") {
-                        console.log("LIKED ", videos[i].url)
-                        // if (videos.indexOf(vid) > -1) {
-                            // videos.splice(videos.indexOf(vid), 1);
-                        // }
+                        // console.log("LIKED ", videos[i].url)
                     }
                     else {
-                        console.log("Adding ", videos[i].url, " : ", res.data.items[0].rating)
+                        // console.log("Adding ", videos[i].url, " : ", res.data.items[0].rating)
                         tmpVideos.push(videos[i]);
                     }
                 })
-
             }
 
             console.log("post_emitting")
             console.log(tmpVideos)
-            socket.emit("loadvideo", tmpVideos)
-            res.redirect("/")
-        }
-        else {
-            console.log("ERROR PATH")
-            socket.emit("error")
-        }
+            // console.log(socket.id);
+            // console.log("eigtl: ", newSocketId)
+            // socket.emit("socket_test");
+            // console.log(u1);
+            io.to(usernames[usernames.findIndex(e => e.username === u1)].socket).emit("loadVideo", tmpVideos);
+            // console.log(usernames)
+            // socket.emit("loadvideo", tmpVideos)
+            // socket.emit("mytest");
+            // res.redirect("/")
+        // }
+        // else {
+        //     console.log("ERROR PATH")
+        //     socket.emit("error")
+        // }
     })
 
     app.post("/post", async (req, res) => {
