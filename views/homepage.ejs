@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Homepage</title>
+  <link rel="stylesheet" href="../public/client/styles/styles.css">
+</head>
+
+<body>
+  <h1>Welcome to the Homepage, <span class="type" id="usernameSpan"><%=username%></span> (<%=name%>)! Points: <span class="type" id="anzPoints"><%=points%></span></h1>
+  <form action="/logout" method="post">
+    <button>Log out</button>
+  </form>
+  <form action="/post" method="post">
+    <input type="number" placeholder="Points" name="points" id="pointsBox"><input type="text" placeholder="Video URL" name="videoUrl" id="videoUrlTextBox">
+    <br>
+    <button id="submitButton">Add video!</button>
+  </form>
+  <h2>Like other peoples videos and earn points!</h2>
+  <form action="/loadvideo" method="get">
+    <button id="loadButton">Load a random video</button>
+  </form>
+  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js" integrity="sha384-/KNQL8Nu5gCHLqwqfQjA689Hhoqgi2S84SNUxC3roTe4EhJ9AfLkp8QiQcU8AMzI" crossorigin="anonymous"></script>
+  <script src="../public/client/homepage.js"></script>
+</body>
+
+</html>
