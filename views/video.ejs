@@ -13,16 +13,12 @@
 
   <script>
 
-
-    // 2. This code loads the IFrame Player API code asynchronously.
     var tag = document.createElement('script');
 
     tag.src = "https://www.youtube.com/iframe_api";
     var firstScriptTag = document.getElementsByTagName('script')[0];
     firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-    // 3. This function creates an <iframe> (and YouTube player)
-    //    after the API code downloads.
     var player;
     function onYouTubeIframeAPIReady() {
       player = new YT.Player('player', {
@@ -38,17 +34,21 @@
         }
       });
     }
+
     function onPlayerReady(event) {
-      // event.target.playVideo();
     }
+
     function onPlayerStateChange(event) {
     }
+
   </script>
 
   <form action="/loadvideo" method="get">
     <button id="newVideoButton">New video</button>
   </form>
-  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js" integrity="sha384-/KNQL8Nu5gCHLqwqfQjA689Hhoqgi2S84SNUxC3roTe4EhJ9AfLkp8QiQcU8AMzI" crossorigin="anonymous"></script>
+  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"
+    integrity="sha384-/KNQL8Nu5gCHLqwqfQjA689Hhoqgi2S84SNUxC3roTe4EhJ9AfLkp8QiQcU8AMzI"
+    crossorigin="anonymous"></script>
   <script src="../public/client/videoPage.js"></script>
 </body>
 

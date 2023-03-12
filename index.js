@@ -6,7 +6,7 @@ const Video = require("./models/video")
 const bcrypt = require("bcrypt");
 const session = require("express-session");
 const axios = require("axios");
-const apiKey = "AIzaSyCSDqow8VWJciwN43_9BTgKRD3tHLxT3G4" //Youtube V3 API Key notwendig
+const apiKey = "" //Youtube V3 API Key notwendig
 const creds = require("./credentials.json");
 const { google } = require("googleapis");
 const { oauth2 } = require("googleapis/build/src/apis/oauth2");
@@ -27,7 +27,7 @@ const { Server } = require("socket.io");
 const io = new Server(server);
 
 const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost:27017/likefourlike'); //MongoDB Verbindung notwendig
+mongoose.connect(''); //MongoDB Verbindung notwendig
 
 app.use("/public", express.static("public")) //für lokale JS Dateien
 
