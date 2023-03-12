@@ -6,7 +6,7 @@ const Video = require("./models/video")
 const bcrypt = require("bcrypt");
 const session = require("express-session");
 const axios = require("axios");
-const api = "AIzaSyCSDqow8VWJciwN43_9BTgKRD3tHLxT3G4"
+const apiKey = "AIzaSyCSDqow8VWJciwN43_9BTgKRD3tHLxT3G4" //Youtube V3 API Key notwendig
 const creds = require("./credentials.json");
 const { google } = require("googleapis");
 const { oauth2 } = require("googleapis/build/src/apis/oauth2");
@@ -27,7 +27,7 @@ const { Server } = require("socket.io");
 const io = new Server(server);
 
 const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost:27017/likefourlike');
+mongoose.connect('mongodb://localhost:27017/likefourlike'); //MongoDB Verbindung notwendig
 
 app.use("/public", express.static("public")) //für lokale JS Dateien
 
@@ -119,11 +119,11 @@ app.post("/dev", async (req, res) => {
 
 app.get("/google/callback", async (req, res) => {
     const code = req.query.code;
-    console.log("CODE: ", code);
+    // console.log("CODE: ", code);
     const { tokens } = await oauth2Client.getToken(code)
     oauth2Client.setCredentials(tokens);
-    console.log("successfully authed");
-    console.log("LOGGED IN")
+    // console.log("successfully authed");
+    // console.log("LOGGED IN")
     logged = true;
     res.redirect("/")
 })
@@ -211,13 +211,14 @@ io.on("connection", (socket) => {
                 })
             }
 
-            console.log("post_emitting")
+            console.log("EMITTING VIDEOS TO ", usernames[usernames.findIndex(e => e.username === u1)].socket);
             console.log(tmpVideos)
             // console.log(socket.id);
             // console.log("eigtl: ", newSocketId)
             // socket.emit("socket_test");
             // console.log(u1);
-            io.to(usernames[usernames.findIndex(e => e.username === u1)].socket).emit("loadVideo", tmpVideos);
+            
+            io.to(usernames[usernames.findIndex(e => e.username === u1)].socket).emit("loadvideo", tmpVideos);
             // console.log(usernames)
             // socket.emit("loadvideo", tmpVideos)
             // socket.emit("mytest");
@@ -232,7 +233,7 @@ io.on("connection", (socket) => {
     app.post("/post", async (req, res) => {
 
         let notFound = false;
-        await axios.get(`https://youtube.googleapis.com/youtube/v3/videos?part=snippet&id=${req.body.videoUrl}&key=${api}`)
+        await axios.get(`https://youtube.googleapis.com/youtube/v3/videos?part=snippet&id=${req.body.videoUrl}&key=${apiKey}`)
             .then(res => {
                 if (!res.data.items[0]) {
                     console.log("Video not found")
@@ -305,9 +306,9 @@ app.post("/logout", (req, res) => {
     res.redirect("/login");
 })
 
-function getRandomInt(max) {
-    return Math.floor(Math.random() * max);
-}
+// function getRandomInt(max) {
+//     return Math.floor(Math.random() * max);
+// }
 
 server.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
