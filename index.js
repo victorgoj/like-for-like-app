@@ -124,14 +124,10 @@ io.on("connection", (socket) => {
     console.log("[Server]: connection established with socket id: ", socket.id)
 
     socket.on("update_socket", (username1) => {
-        console.log("[SERVER] received username from ", socket.id, " and username: ", username1);
-        console.log(usernames.filter(e => e.username === username1));
         if(!usernames.filter(e => e.username === username1).length > 0) {
-        console.log("Adding for first time ", username1, " and ", socket.id);
             usernames.push({username: username1, socket: socket.id})
         }  
         else {
-            console.log("Updating")
             usernames[usernames.findIndex(e => e.username === username1)].socket = socket.id;
         }
     })
@@ -165,10 +161,7 @@ io.on("connection", (socket) => {
 
     app.post("/loadvideo", async (req, res) => {
 
-        console.log("p1: ", socket.id)
-
         const u1 = req.body.username;
-        console.log("u1 ", u1);
         const videos = await Video.find({ "user": { $ne: u1 } });
         if (videos) {
             var youtube = google.youtube({
