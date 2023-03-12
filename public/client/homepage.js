@@ -95,7 +95,7 @@ postButton.addEventListener("click", (e) => {
 
 const enoughPoints = (points) => {
     const userPoints = parseInt(document.getElementById("anzPoints").innerHTML);
-    console.log("comparing ", points, " and ", userPoints)
+    // console.log("comparing ", points, " and ", userPoints)
     if (points <= userPoints) {
         return true;
     }

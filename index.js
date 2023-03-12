@@ -153,8 +153,7 @@ io.on("connection", (socket) => {
     socket.on("likeVideoEvent", async (data) => {
         
         //TODO:
-        //2. Give points
-        //3. Points abziehen
+        //remove videos with users with <= 0 points
         var youtube = google.youtube({
             version: "v3"
         })
@@ -166,6 +165,7 @@ io.on("connection", (socket) => {
 
         const liker = await User.findOne({"username" : data.username}) 
         const uploader = await User.findOne({"username" : data.uploader}) 
+        // const video = await Video.find({user: `${data.uploader}`})
         // console.log("USER FOUND: ", uploader.username, " , ", uploader.points)
 
         liker.points += data.points;
@@ -173,11 +173,12 @@ io.on("connection", (socket) => {
         await liker.save();
         await uploader.save();
 
-        if(uploader.points <= 0) {
+        // console.log("CHECKING UPLOADER POINTS ", uploader.points)
+        // if(uploader.points <= 0) {
             //remove vid
-            const videos = await Video.findOne({"url": data.url}).remove();
-            console.log("VIDEO REMOVED")
-        }
+        await Video.find({"user": data.uploader, "points": {$gt: uploader.points}}).remove();
+            console.log("VIDEOS REMOVED")
+        // }
 
     })
 
@@ -201,13 +202,18 @@ io.on("connection", (socket) => {
                         `${videos[i].url}`
                     ]
                 }).then(res => {
-                    if (res.data.items[0].rating == "like") {
+                    console.log("STATUS FOR ", videos[i].url + " " + res.data.items[0].rating)
+                    if (!(res.data.items[0].rating === "like")) {
+                        tmpVideos.push(videos[i]);
+                        console.log("adding ", videos[i].url)
                         // console.log("LIKED ", videos[i].url)
                     }
                     else {
-                        // console.log("Adding ", videos[i].url, " : ", res.data.items[0].rating)
-                        tmpVideos.push(videos[i]);
+                        console.log("not adding ", videos[i].url)
                     }
+                    // else {
+                    //     // console.log("Adding ", videos[i].url, " : ", res.data.items[0].rating)
+                    // }
                 })
             }
 
