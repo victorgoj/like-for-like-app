@@ -80,16 +80,10 @@ app.get("/", requireLogin, async (req, res) => {
     else {
         var oauth2 = google.oauth2({
             version: "v2"
-            // auth: oauth2Client
         })
         var name = "";
-        // await oauth2.userinfo.get((err, res) => { //TODO: FIX
-        // console.log("here1:", res.data.name);
-        // name = res.data.name; 
-        // })
         const userInfos = await oauth2.userinfo.get();
         name = userInfos.data.name;
-        // console.log("here1", tryThis.data.name)
         const user = await User.findOne({ username: req.session.username });
         const username = user.username;
         const points = user.points;
@@ -97,7 +91,6 @@ app.get("/", requireLogin, async (req, res) => {
         for await (const vid of Video.find()) {
             videosArray.push(vid);
         }
-        // console.log("here2", name);
         res.render("homepage.ejs", { username, points, videosArray, name })
     }
 })
@@ -119,11 +112,8 @@ app.post("/dev", async (req, res) => {
 
 app.get("/google/callback", async (req, res) => {
     const code = req.query.code;
-    // console.log("CODE: ", code);
     const { tokens } = await oauth2Client.getToken(code)
     oauth2Client.setCredentials(tokens);
-    // console.log("successfully authed");
-    // console.log("LOGGED IN")
     logged = true;
     res.redirect("/")
 })
@@ -152,8 +142,6 @@ io.on("connection", (socket) => {
 
     socket.on("likeVideoEvent", async (data) => {
         
-        //TODO:
-        //remove videos with users with <= 0 points
         var youtube = google.youtube({
             version: "v3"
         })
@@ -165,20 +153,13 @@ io.on("connection", (socket) => {
 
         const liker = await User.findOne({"username" : data.username}) 
         const uploader = await User.findOne({"username" : data.uploader}) 
-        // const video = await Video.find({user: `${data.uploader}`})
-        // console.log("USER FOUND: ", uploader.username, " , ", uploader.points)
 
         liker.points += data.points;
         uploader.points -= data.points;
         await liker.save();
         await uploader.save();
-
-        // console.log("CHECKING UPLOADER POINTS ", uploader.points)
-        // if(uploader.points <= 0) {
-            //remove vid
         await Video.find({"user": data.uploader, "points": {$gt: uploader.points}}).remove();
-            console.log("VIDEOS REMOVED")
-        // }
+       
 
     })
 
@@ -202,37 +183,12 @@ io.on("connection", (socket) => {
                         `${videos[i].url}`
                     ]
                 }).then(res => {
-                    console.log("STATUS FOR ", videos[i].url + " " + res.data.items[0].rating)
                     if (!(res.data.items[0].rating === "like")) {
                         tmpVideos.push(videos[i]);
-                        console.log("adding ", videos[i].url)
-                        // console.log("LIKED ", videos[i].url)
                     }
-                    else {
-                        console.log("not adding ", videos[i].url)
-                    }
-                    // else {
-                    //     // console.log("Adding ", videos[i].url, " : ", res.data.items[0].rating)
-                    // }
                 })
             }
-
-            console.log("EMITTING VIDEOS TO ", usernames[usernames.findIndex(e => e.username === u1)].socket);
-            console.log(tmpVideos)
-            // console.log(socket.id);
-            // console.log("eigtl: ", newSocketId)
-            // socket.emit("socket_test");
-            // console.log(u1);
-            
             io.to(usernames[usernames.findIndex(e => e.username === u1)].socket).emit("loadvideo", tmpVideos);
-            // console.log(usernames)
-            // socket.emit("loadvideo", tmpVideos)
-            // socket.emit("mytest");
-            // res.redirect("/")
-        // }
-        // else {
-        //     console.log("ERROR PATH")
-        //     socket.emit("error")
         }
     })
 
@@ -254,8 +210,6 @@ io.on("connection", (socket) => {
             const user = await User.findOne({ username: req.body.username });
             const username = user.username;
             const points = user.points;
-            // console.log("USERNAME: ", username, " POINTS: ", points);
-            // user.points -= req.body.points;
             await user.save();
             const videoVorhanden = await Video.findOne({ url: req.body.videoUrl })
             if (!videoVorhanden) {
@@ -265,13 +219,11 @@ io.on("connection", (socket) => {
                     points: req.body.points
                 })
                 await video.save();
-                console.log("Video Posted!")
                 socket.emit("success");
                 res.redirect("/");
             }
             else {
                 socket.emit("error")
-                console.log("Video schon vorhanden!")
             }
         }
     })
@@ -311,10 +263,6 @@ app.post("/logout", (req, res) => {
     req.session.user_id = null;
     res.redirect("/login");
 })
-
-// function getRandomInt(max) {
-//     return Math.floor(Math.random() * max);
-// }
 
 server.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
